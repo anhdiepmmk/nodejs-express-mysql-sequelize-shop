@@ -11,8 +11,8 @@
                     <% orders.forEach(e => { %>
                         <h1>#<%= e._id %></h1>
                             <ul>
-                                <% e.items.forEach(p => { %>
-                                    <li><%= p.title %> (<%= p.quantity %>)</li>
+                                <% e.products.forEach(p => { %>
+                                    <li><%= p.product.title %> (<%= p.quantity %>)</li>
                                 <% }) %>
                             </ul>
                     <% }) %>
