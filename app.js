@@ -1,5 +1,7 @@
 const path = require("path");
 
+const mongoose = require("mongoose");
+
 const express = require("express");
 const bodyParser = require("body-parser");
 
@@ -18,15 +20,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use((req, res, next) => {
-  User.findById("5faf90ef84001d46c1413ab1")
+  User.findOne()
     .then((user) => {
-      req.user = new User(user.name, user.email, user.cart, user._id);
+      req.user = user
       next();
     })
     .catch((err) => {
       console.log(err);
-    }).finally(() => {
-    });
+    })
+    .finally(() => {});
 });
 
 app.use("/admin", adminRoutes);
@@ -34,4 +36,29 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-app.listen(3000);
+mongoose
+  .connect(
+    "mongodb+srv://admin:admina123@cluster0.tkdbb.mongodb.net/test?retryWrites=true&w=majority"
+  )
+  .then((result) => {
+    console.log('Mongodb Connected!');
+    User.findOne()
+      .then((user) => {
+        if (!user) {
+          return new User({
+            name: "Diep",
+            email: "n08ni.dieppn@gmail.com",
+            cart: { items: [] },
+          }).save()
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        app.listen(3000);
+      });
+  })
+  .catch((err) => {
+    console.log(err);
+  });
