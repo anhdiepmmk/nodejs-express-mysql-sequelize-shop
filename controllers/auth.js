@@ -5,6 +5,7 @@ exports.getLogin = (req, res, next) => {
     pageTitle: "Login",
     path: "/login",
     authenticatedUser: req.session.user,
+    message: req.flash('message')
   });
 };
 
@@ -24,7 +25,8 @@ exports.postLogin = (req, res, next) => {
         console.log(err);
       });
   } else {
-    res.send("Username or password do not match!");
+    req.flash('message', 'Username and password do not match!')
+    res.redirect('/login')
   }
 };
 

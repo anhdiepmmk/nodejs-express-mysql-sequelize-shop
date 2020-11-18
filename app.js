@@ -4,6 +4,7 @@ const MongoStore = require("connect-mongo")(session);
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const path = require("path");
+const flash = require('connect-flash');
 
 const errorController = require("./controllers/error");
 
@@ -33,6 +34,8 @@ app.use(
     }),
   })
 );
+
+app.use(flash());
 
 app.use((req, res, next) => {
   if (req.session.user) {
