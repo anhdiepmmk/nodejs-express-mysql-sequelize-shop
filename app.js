@@ -1,19 +1,18 @@
 const express = require("express");
 const session = require("express-session");
-const MongoDBStore = require('connect-mongodb-session')(session)
+const MongoStore = require("connect-mongo")(session);
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const path = require("path");
 
 const errorController = require("./controllers/error");
 
-const mongoConnectionString = "mongodb+srv://admin:admina123@cluster0.tkdbb.mongodb.net/test?retryWrites=true&w=majority";
+const mongoConnectionString =
+  "mongodb+srv://admin:admina123@cluster0.tkdbb.mongodb.net/test?retryWrites=true&w=majority";
 
-const app = express(); 
+const app = express();
 app.set("view engine", "ejs");
 app.set("views", "views");
-
-
 
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
@@ -23,33 +22,32 @@ const User = require("./models/user");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
-
 app.use(
   session({
     resave: true,
     saveUninitialized: true,
     secret: "3MlrtFPD521GNDii",
-    cookie: {
-      maxAge: 60000
-    },
-    store: new MongoDBStore({
-      uri: mongoConnectionString,
-      collection: 'sessions'
-    })
+    store: new MongoStore({
+      url: mongoConnectionString,
+      collection: "sessions",
+    }),
   })
 );
 
 app.use((req, res, next) => {
-  User.findOne()
-    .then((user) => {
-      req.session.user = user
-      req.user = user;
-      next();
-    })
-    .catch((err) => {
-      console.log(err);
-    })
-    .finally(() => {});
+  if (req.session.user) {
+    User.findOne({ _id: req.session.user._id })
+      .then((user) => {
+        req.user = user;
+        next();
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {});
+  } else {
+    next();
+  }
 });
 
 app.use("/admin", adminRoutes);
@@ -57,8 +55,6 @@ app.use(shopRoutes);
 app.use(authRoutes);
 
 app.use(errorController.get404);
-
-
 
 mongoose
   .connect(mongoConnectionString)
