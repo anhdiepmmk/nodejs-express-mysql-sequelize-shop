@@ -35,3 +35,16 @@ exports.postLogout = (req, res, next) => {
     res.redirect("/");
   });
 };
+
+exports.getSignup = (req, res, next) => {
+  res.render("auth/signup", {
+    pageTitle: "Signup",
+    path: "/signup",
+    authenticatedUser: req.session.user
+  });
+};
+
+exports.postSignup = (req, res, next) => {
+  res.send({message: "Amazing good job"})
+};
+
