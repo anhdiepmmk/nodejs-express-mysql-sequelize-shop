@@ -45,6 +45,8 @@ exports.getSignup = (req, res, next) => {
 };
 
 exports.postSignup = (req, res, next) => {
-  res.send({message: "Amazing good job"})
+  const crypto = require('crypto')
+  let hash = crypto.createHash('md5').update('some_string').digest("hex")
+  res.send({message: "Amazing good job", hash: hash})
 };
 
