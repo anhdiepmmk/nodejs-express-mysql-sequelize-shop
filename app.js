@@ -4,7 +4,8 @@ const MongoStore = require("connect-mongo")(session);
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const path = require("path");
-const flash = require('connect-flash');
+const flash = require("connect-flash");
+const csrf = require("csurf");
 
 const errorController = require("./controllers/error");
 
@@ -34,6 +35,8 @@ app.use(
     }),
   })
 );
+
+app.use(csrf({ session: true }));
 
 app.use(flash());
 
