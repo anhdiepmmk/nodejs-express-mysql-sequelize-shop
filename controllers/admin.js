@@ -27,7 +27,7 @@ exports.postAddProduct = (req, res, next) => {
     });
 };
 
-exports.getEditProduct = (req, res, next) => {
+exports.getEditProduct = (req, res, next) => { 
   const editMode = req.query.edit;
   if (!editMode) {
     return res.redirect("/");
@@ -40,8 +40,7 @@ exports.getEditProduct = (req, res, next) => {
         pageTitle: "Edit Product",
         path: "/admin/edit-product",
         editing: editMode,
-        product: product,
-        authenticatedUser: req.session.user
+        product: product
       });
     })
     .catch((err) => {
@@ -79,7 +78,6 @@ exports.getProducts = (req, res, next) => {
         prods: products,
         pageTitle: "Admin Products",
         path: "/admin/products",
-        authenticatedUser: req.session.user
       });
     })
     .catch((err) => {

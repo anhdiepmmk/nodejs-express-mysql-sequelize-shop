@@ -5,9 +5,7 @@ exports.getLogin = (req, res, next) => {
   res.render("auth/login", {
     pageTitle: "Login",
     path: "/login",
-    authenticatedUser: req.session.user,
-    message: req.flash("message"),
-    csrfToken: req.csrfToken()
+    message: req.flash("message")
   });
 };
 

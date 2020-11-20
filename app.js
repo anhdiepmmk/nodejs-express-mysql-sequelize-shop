@@ -56,6 +56,12 @@ app.use((req, res, next) => {
   }
 });
 
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  res.locals.authenticatedUser = req.session.user
+  next();
+})
+
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
