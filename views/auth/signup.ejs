@@ -8,8 +8,13 @@
         <main>
             <form class="product-form" action="/signup" method="POST">
                 <div class="form-control">
+                    <label for="name">Name</label>
+                    <input type="text" name="name" id="name" placeholder="Your name">
+                </div>
+
+                <div class="form-control">
                     <label for="username">User name</label>
-                    <input type="text" name="username" id="username">
+                    <input type="text" name="username" id="username" placeholder="Please enter your email or an user name">
                 </div>
 
                 <div class="form-control">
@@ -18,8 +23,8 @@
                 </div>
 
                 <div class="form-control">
-                    <label for="confirm_password">Confirm Password</label>
-                    <input type="confirm_password" name="confirm_password" id="confirm_password">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="confirmPassword" name="confirmPassword" id="confirmPassword">
                 </div>
     
                 <button class="btn" type="submit">Signup</button>

@@ -29,7 +29,11 @@
         </ul>
         <ul class="main-header__item-list">
             <% if(authenticatedUser) { %>
-                    <li>
+                    <li class="main-header__item">
+                        <a href="#">HI <%= authenticatedUser.name %>
+                        </a>
+                    </li>
+                    <li class="main-header__item">
                         <form method="POST" action="/logout">
                             <button type="submit" class="btn">Logout</button>
                         </form>
