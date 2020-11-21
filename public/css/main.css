@@ -234,3 +234,12 @@ form {
     display: none;
   }
 }
+
+.message {
+  background-color: #ee7f7f;
+  color: white;
+  padding: 1rem;
+  margin: auto;
+  border: black solid 0.5px;
+  border-radius: 3px;
+}

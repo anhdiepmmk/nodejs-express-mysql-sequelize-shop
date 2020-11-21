@@ -7,7 +7,9 @@
         <%- include('../includes/navigation.ejs') %>
         <main>
             <form class="product-form" action="/login" method="POST">
-                <div><%= message %></div>
+                <% if(message !== undefined && message.length > 0) { %>
+                    <div class="message"><%= message %></div>
+                <% } %>
                 <div class="form-control">
                     <label for="username">User name</label>
                     <input type="text" name="username" id="username" required>
