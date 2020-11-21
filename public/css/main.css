@@ -236,10 +236,19 @@ form {
 }
 
 .message {
-  background-color: #ee7f7f;
+  background-color: #7d93eb;
   color: white;
   padding: 1rem;
   margin: auto;
-  border: black solid 0.5px;
+  border: #082fae solid 0.5px;
+  border-radius: 3px;
+}
+
+.message--error {
+  background-color: #ed6868;
+  color: #a50909;
+  padding: 1rem;
+  margin: auto;
+  border: #a50909 solid 0.5px;
   border-radius: 3px;
 }

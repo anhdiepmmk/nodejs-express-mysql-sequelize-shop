@@ -8,7 +8,7 @@
         <main>
             <form class="product-form" action="/login" method="POST">
                 <% if(message !== undefined && message.length > 0) { %>
-                    <div class="message"><%= message %></div>
+                    <div class="message message--error"><%= message.join(', ') %></div>
                 <% } %>
                 <div class="form-control">
                     <label for="username">User name</label>

@@ -7,6 +7,9 @@
         <%- include('../includes/navigation.ejs') %>
         <main>
             <form class="product-form" action="/signup" method="POST">
+                <% if(message !== undefined && message.length > 0) { %>
+                    <div class="message message--error"><%= message.join(', ') %></div>
+                <% } %>
                 <div class="form-control">
                     <label for="name">Name</label>
                     <input type="text" name="name" id="name" placeholder="Your name">

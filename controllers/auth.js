@@ -1,11 +1,46 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 
+const nodemailer = require("nodemailer");
+const sendgridTransport = require("nodemailer-sendgrid-transport");
+
+const sendMailBySendGridTransporter = (payload) => {
+  //create new transporter by send grid
+  const transporter = nodemailer.createTransport(
+    sendgridTransport({
+      auth: {
+        api_key:
+          "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",
+      },
+    })
+  );
+
+  //send email by transporter above
+  return transporter.sendMail(payload);
+};
+
+const sendMailBySMTPTransporter = (payload) => {
+  //create new transporter by send grid
+  const transporter = nodemailer.createTransport({
+    pool: true,
+    host: "smtp.sendgrid.net",
+    port: 25,
+    auth: {
+      user: "apikey",
+      pass:
+        "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",
+    },
+  });
+
+  //send email by transporter above
+  return transporter.sendMail(payload);
+};
+
 exports.getLogin = (req, res, next) => {
   res.render("auth/login", {
     pageTitle: "Login",
     path: "/login",
-    message: req.flash("message")
+    message: req.flash("message"),
   });
 };
 
@@ -54,7 +89,7 @@ exports.getSignup = (req, res, next) => {
   res.render("auth/signup", {
     pageTitle: "Signup",
     path: "/signup",
-    authenticatedUser: req.session.user,
+    message: req.flash("message"),
   });
 };
 
@@ -67,6 +102,7 @@ exports.postSignup = (req, res, next) => {
   User.findOne({ username })
     .then((user) => {
       if (user) {
+        req.flash("message", "Email already exist, please pick different one!");
         return res.redirect("/login");
       } else {
         return bcrypt
@@ -80,8 +116,20 @@ exports.postSignup = (req, res, next) => {
             });
             return user.save();
           })
-          .then(() => {
-            res.redirect("/login");
+          .then((user) => {
+            sendMailBySMTPTransporter({
+              to: user.username,
+              from: "dieppn@sskpi.com",
+              subject: "Sigup succeeded!!",
+              html: "<h1>You successfully signed up!!</h1>",
+            })
+              .then((result) => {})
+              .catch((err) => {
+                console.log("auth.transporter.sendMail.catch", err);
+              })
+              .finally(() => {
+                res.redirect("/login");
+              });
           })
           .catch((err) => {
             console.log(err);
