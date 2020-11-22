@@ -5,7 +5,8 @@ exports.getAddProduct = (req, res, next) => {
     pageTitle: "Add Product",
     path: "/admin/add-product",
     editing: false,
-    authenticatedUser: req.session.user
+    authenticatedUser: req.session.user,
+    message: req.flash('message')
   });
 };
 
@@ -27,7 +28,7 @@ exports.postAddProduct = (req, res, next) => {
     });
 };
 
-exports.getEditProduct = (req, res, next) => { 
+exports.getEditProduct = (req, res, next) => {
   const editMode = req.query.edit;
   if (!editMode) {
     return res.redirect("/");
@@ -40,7 +41,8 @@ exports.getEditProduct = (req, res, next) => {
         pageTitle: "Edit Product",
         path: "/admin/edit-product",
         editing: editMode,
-        product: product
+        product: product,
+        message: req.flash("message"),
       });
     })
     .catch((err) => {
@@ -56,23 +58,35 @@ exports.postEditProduct = (req, res, next) => {
   const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
 
-  Product.updateOne(
-    { _id: prodId },
-    {
-      title: updatedTitle,
-      price: updatedPrice,
-      imageUrl: updatedImageUrl,
-      description: updatedDesc,
-    },
-    (err, raw) => {
-      console.log('postEditProduct', err, raw);
-      res.redirect("/admin/products");
-    }
-  );
+  Product.findById(prodId)
+    .then((product) => {
+      console.log(product);
+      if (product.userId.toString() === req.user._id.toString()) {
+        product.title = updatedTitle;
+        product.price = updatedPrice;
+        product.imageUrl = updatedImageUrl;
+        product.description = updatedDesc;
+        product
+          .save()
+          .then((result) => {
+            req.flash("message", "Updated.");
+            res.redirect("back");
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      } else {
+        req.flash("message", "Permission denied.");
+        res.redirect("back");
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.find()
+  Product.find({ userId: req.user._id })
     .then((products) => {
       res.render("admin/products", {
         prods: products,
@@ -88,7 +102,7 @@ exports.getProducts = (req, res, next) => {
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
 
-  Product.deleteOne({ _id: prodId }, (err) => {
+  Product.deleteOne({ _id: prodId, userId: req.user._id }, (err) => {
     res.redirect("/admin/products");
   });
 };
