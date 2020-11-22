@@ -6,23 +6,16 @@
     <body>
         <%- include('../includes/navigation.ejs') %>
         <main>
-            <form class="product-form" action="/login" method="POST">
+            <form class="product-form" action="/reset" method="POST">
                 <% if(message !== undefined && message.length > 0) { %>
                     <div class="message message--error"><%= message.join(', ') %></div>
                 <% } %>
                 <div class="form-control">
-                    <label for="username">User name</label>
+                    <label for="username">Email</label>
                     <input type="text" name="username" id="username" required>
                 </div>
-                <div class="form-control">
-                    <label for="password">Password</label>
-                    <input type="password" name="password" id="password" required>
-                </div>
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                <button class="btn" type="submit">Login</button>
-                <div class="centered">
-                    <a href="/reset" >Forgot password</a>
-                </div>
+                <button class="btn" type="submit">Reset</button>
             </form>
         </main>
         <%- include('../includes/end.ejs') %>
