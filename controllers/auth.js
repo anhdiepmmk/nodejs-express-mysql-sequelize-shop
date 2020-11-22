@@ -1,5 +1,6 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 
 const nodemailer = require("nodemailer");
 const sendgridTransport = require("nodemailer-sendgrid-transport");
@@ -150,5 +151,114 @@ exports.getReset = (req, res, next) => {
 };
 
 exports.postReset = (req, res, next) => {
-  console.log(req);
+  const origin = req.get("origin");
+  const username = req.body.username;
+
+  crypto.randomBytes(32, (err, buffer) => {
+    if (err) {
+      console.log(err);
+    } else {
+      User.findOne({ username: username })
+        .then((user) => {
+          console.log(user);
+          if (!user) {
+            req.flash("message", "No account with that email found!");
+            res.redirect("/reset");
+          } else {
+            const token = buffer.toString("hex");
+            user.resetToken = token;
+            user.resetTokenExpiration = Date.now() + 60 * 60 * 1000;
+            return user.save();
+          }
+        })
+        .then((result) => {
+          if (typeof result === "object") {
+            sendMailBySMTPTransporter({
+              to: result.username,
+              from: "dieppn@sskpi.com",
+              subject: "Reset password",
+              html: `
+                <p>You requested a password reset</p>
+                <p>Click this <a href="${origin}/reset/${result.resetToken}">link</a> to set a new password</p>
+              `,
+            });
+
+            req.flash(
+              "message",
+              `We sent a email include reset password url to ${result.username}`
+            );
+            res.redirect("/reset");
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  });
+};
+
+exports.getNewPassword = (req, res, next) => {
+  const token = req.params.token;
+
+  User.findOne({ resetToken: token })
+    .then((user) => {
+      const errorMessage = req.flash("errorMessage");
+
+      if (user) {
+        if (user.resetTokenExpiration < Date.now()) {
+          errorMessage.push("This link has expired");
+        }
+      } else {
+        errorMessage.push("User not found");
+      }
+
+      res.render("auth/new-password", {
+        pageTitle: "New Password",
+        path: "/reset",
+        message: req.flash("message"),
+        errorMessage,
+        ableToReset: errorMessage.length === 0,
+        token,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+exports.postNewPassword = (req, res, next) => {
+  const token = req.body.token;
+  const password = req.body.password;
+
+  User.findOne({ resetToken: token })
+    .then((user) => {
+      if (user) {
+        if (user.resetTokenExpiration < Date.now()) {
+          req.flash("message", "This link has expired");
+          res.redirect("/login");
+        } else {
+          return bcrypt
+            .hash(password, 12)
+            .then((encryptedPassword) => {
+              user.password = encryptedPassword;
+              user.resetToken = undefined;
+              user.resetTokenExpiration = undefined;
+              return user.save();
+            })
+            .then((result) => {
+              req.flash(
+                "message",
+                "Your password has reset. Now you can login with your new password"
+              );
+              res.redirect("/login");
+            });
+        }
+      } else {
+        req.flash("errorMessage", "User not found");
+        res.redirect("back");
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
