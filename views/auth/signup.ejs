@@ -12,22 +12,55 @@
                 <% } %>
                 <div class="form-control">
                     <label for="name">Name</label>
-                    <input type="text" name="name" id="name" placeholder="Your name">
+                    <input 
+                        type="text" 
+                        name="name" 
+                        id="name" placeholder="Your name" 
+                        value="<%= old !== undefined && old.name ? old.name : '' %>"
+                    >
+                    <div class="validate-error"><%= validationResultErrors !== undefined 
+                        ? validationResultErrors.errors.filter(e => e.param === 'name').map(e => e.msg).join(', ')
+                        : '' %></div>
                 </div>
 
                 <div class="form-control">
                     <label for="username">User name</label>
-                    <input type="text" name="username" id="username" placeholder="Please enter your email or an user name">
+                    <input 
+                        type="text" 
+                        name="username" 
+                        id="username" 
+                        placeholder="Please enter your email"
+                        value="<%= old !== undefined && old.username ? old.username : '' %>"
+                    >
+                    <div class="validate-error"><%= validationResultErrors !== undefined 
+                        ? validationResultErrors.errors.filter(e => e.param === 'username').map(e => e.msg).join(', ')
+                        : '' %></div>
                 </div>
 
                 <div class="form-control">
                     <label for="password">Password</label>
-                    <input type="password" name="password" id="password">
+                    <input 
+                        type="password" 
+                        name="password" 
+                        id="password"
+                        value="<%= old !== undefined && old.password ? old.password : '' %>"
+                    >
+                    <div class="validate-error"><%= validationResultErrors !== undefined 
+                        ? validationResultErrors.errors.filter(e => e.param === 'password').map(e => e.msg).join(', ')
+                        : '' %></div>
                 </div>
 
                 <div class="form-control">
                     <label for="confirmPassword">Confirm Password</label>
-                    <input type="confirmPassword" name="confirmPassword" id="confirmPassword">
+                    <input 
+                        type="password" 
+                        name="confirmPassword" 
+                        id="confirmPassword"
+                        value="<%= old !== undefined && old.confirmPassword ? old.confirmPassword : '' %>"
+                    >
+                    <div class="validate-error"><%= validationResultErrors !== undefined 
+                        ? validationResultErrors.errors.filter(e => e.param === 'confirmPassword').map(e => e.msg).join(', ')
+                        : '' %></div>
                 </div>
     
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" />

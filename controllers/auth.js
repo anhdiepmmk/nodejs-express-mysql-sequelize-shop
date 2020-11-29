@@ -1,8 +1,7 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
-const { body, validationResult } = require('express-validator');
-
+const { body, validationResult } = require("express-validator");
 
 const nodemailer = require("nodemailer");
 const sendgridTransport = require("nodemailer-sendgrid-transport");
@@ -41,29 +40,35 @@ const sendMailBySMTPTransporter = (payload) => {
 };
 
 exports.getLogin = (req, res, next) => {
-  const validationResultErrors = req.flash('validationResultErrors')
-  
+  const validationResultErrors = req.flash("validationResultErrors");
+
   res.render("auth/login", {
     pageTitle: "Login",
     path: "/login",
     message: req.flash("message"),
-    validationResultErrors: validationResultErrors.shift()
+    validationResultErrors: validationResultErrors.shift(),
   });
 };
 
 exports.postLogin = async (req, res, next) => {
-  await body('username')
-  .notEmpty().withMessage('Bạn chưa nhập tên tài khoản').bail()
-  .isEmail().withMessage('Tên đăng nhập không hợp lệ')
-  .run(req);
+  await body("username")
+    .notEmpty()
+    .withMessage("Bạn chưa nhập tên tài khoản")
+    .bail()
+    .isEmail()
+    .withMessage("Tên đăng nhập không hợp lệ")
+    .run(req);
 
-  await body('password').notEmpty().withMessage('Bạn chưa nhập mật khẩu').run(req);
+  await body("password")
+    .notEmpty()
+    .withMessage("Bạn chưa nhập mật khẩu")
+    .run(req);
 
-  const errors = validationResult(req)
+  const errors = validationResult(req);
 
-  if(!errors.isEmpty()){
-    req.flash('validationResultErrors', errors);
-    return res.redirect('back');
+  if (!errors.isEmpty()) {
+    req.flash("validationResultErrors", errors);
+    return res.redirect("back");
   }
 
   const username = req.body.username;
@@ -111,10 +116,60 @@ exports.getSignup = (req, res, next) => {
     pageTitle: "Signup",
     path: "/signup",
     message: req.flash("message"),
+    validationResultErrors: req.flash("validationResultErrors").shift(),
+    old: req.flash("old").shift(),
   });
 };
 
+exports.validateSignup = () => {
+  return [
+    body("name").notEmpty().withMessage("Tên không được bỏ trống"),
+    body("username")
+      .notEmpty()
+      .withMessage("Tên đăng nhập không được bỏ trống")
+      .bail()
+      .isEmail()
+      .withMessage("Tên đăng nhập phải là email")
+      .custom((value) => {
+        return User.findOne({ username: value })
+        .then((user) => {
+          if(user){
+            throw new Error("Tên đăng nhập đã được sử dụng");
+          }
+        });
+      }),
+    body("password")
+      .notEmpty()
+      .withMessage("Mật khẩu không được bỏ trống")
+      .bail()
+      .isLength({ min: 6, max: 50 })
+      .withMessage("Mật khẩu hợp lệ có độ dài từ 6 - 50 ký tự"),
+    body("confirmPassword")
+      .notEmpty()
+      .withMessage("Mật khẩu xác nhận không được bỏ trống ")
+      .custom((value, { req }) => {
+        if (value !== req.body.password) {
+          throw new Error("Mật khẩu xác nhận không khớp");
+        }
+        return true;
+      }),
+  ];
+};
+
 exports.postSignup = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    req.flash("old", {
+      name: req.body.name,
+      username: req.body.username,
+      password: req.body.password,
+      confirmPassword: req.body.confirmPassword,
+    });
+    req.flash("validationResultErrors", errors);
+    return res.redirect("back");
+  }
+
   const name = req.body.name;
   const username = req.body.username;
   const password = req.body.password;
