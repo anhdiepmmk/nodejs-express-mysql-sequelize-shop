@@ -1,0 +1,23 @@
+<%- include('includes/head.ejs') %>
+</head>
+
+<body>
+    <%- include('includes/navigation.ejs') %>
+
+    <div class="padding-1_5rem">
+        <div>
+            <h1>message</h1>
+            <code>
+                <%= err.message %>
+            </code>
+        </div>
+    
+        <div>
+            <h1>stack</h1>
+            <code>
+                <%= err.stack %>
+            </code>
+        </div>
+    </div>
+
+<%- include('includes/end.ejs') %>

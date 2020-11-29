@@ -258,3 +258,7 @@ form {
   font-size: 80%;
   font-weight: 400;
 }
+
+.padding-1_5rem {
+  padding: 1.5rem;
+}

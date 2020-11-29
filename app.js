@@ -58,15 +58,23 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
   res.locals.csrfToken = req.csrfToken();
-  res.locals.authenticatedUser = req.session.user
+  res.locals.authenticatedUser = req.session.user;
   next();
-})
+});
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 
 app.use(errorController.get404);
+
+app.use((err, req, res, next) => {
+  res.status(500).render('error', {
+    pageTitle: 'Error!',
+    path: '/error',
+    err: err
+  });
+});
 
 mongoose
   .connect(mongoConnectionString)

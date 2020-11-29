@@ -21,7 +21,8 @@ exports.getValidateProduct = () => {
       })
       .withMessage("Image URL không được dài quá 255 ký tự")
       .bail()
-      .isURL().withMessage('Image URL không hợp lệ'),
+      .isURL()
+      .withMessage("Image URL không hợp lệ"),
 
     body("price")
       .notEmpty()
@@ -80,7 +81,7 @@ exports.postAddProduct = (req, res, next) => {
       res.redirect("/");
     })
     .catch((err) => {
-      console.log(err);
+      next(err);
     });
 };
 
@@ -89,7 +90,6 @@ exports.getEditProduct = (req, res, next) => {
   if (!editMode) {
     return res.redirect("/");
   }
- 
 
   const prodId = req.params.productId;
 
@@ -97,19 +97,22 @@ exports.getEditProduct = (req, res, next) => {
 
   Product.findById(prodId)
     .then((product) => {
+      if (!product) {
+        throw new Error("Product not found");
+      }
+
       res.render("admin/edit-product", {
         pageTitle: "Edit Product",
         path: "/admin/edit-product",
         editing: editMode,
         product: product,
         message: req.flash("message"),
-        old: old ? old : product, 
+        old: old ? old : product,
         validationResultErrors: req.flash("validationResultErrors").shift(),
       });
     })
     .catch((err) => {
-      console.log(err);
-      res.status(404).send(err);
+      next(err);
     });
 };
 
