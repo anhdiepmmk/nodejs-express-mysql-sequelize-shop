@@ -20,6 +20,7 @@ const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
 const User = require("./models/user");
+const NotFoundError = require("./errors/NotFoundError");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -69,11 +70,16 @@ app.use(authRoutes);
 app.use(errorController.get404);
 
 app.use((err, req, res, next) => {
-  res.status(500).render('error', {
-    pageTitle: 'Error!',
-    path: '/error',
-    err: err
-  });
+  if(err instanceof NotFoundError){
+    res.status(err.httpStatusCode).send(err.message)
+  }else{
+    res.status(500).render('error', {
+      pageTitle: 'Error!',
+      path: '/error',
+      err: err
+    });
+  }
+  
 });
 
 mongoose

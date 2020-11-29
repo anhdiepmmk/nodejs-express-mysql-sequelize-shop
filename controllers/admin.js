@@ -1,5 +1,6 @@
 const Product = require("../models/product");
 const { body, validationResult } = require("express-validator");
+const NotFoundError = require("../errors/NotFoundError");
 
 exports.getValidateProduct = () => {
   return [
@@ -98,7 +99,7 @@ exports.getEditProduct = (req, res, next) => {
   Product.findById(prodId)
     .then((product) => {
       if (!product) {
-        throw new Error("Product not found");
+        throw new NotFoundError('Product not found')
       }
 
       res.render("admin/edit-product", {
