@@ -40,13 +40,12 @@ const sendMailBySMTPTransporter = (payload) => {
 };
 
 exports.getLogin = (req, res, next) => {
-  const validationResultErrors = req.flash("validationResultErrors");
-
   res.render("auth/login", {
     pageTitle: "Login",
     path: "/login",
     message: req.flash("message"),
-    validationResultErrors: validationResultErrors.shift(),
+    validationResultErrors: req.flash("validationResultErrors").shift(),
+    old: req.flash("old").shift(),
   });
 };
 
@@ -68,6 +67,10 @@ exports.postLogin = async (req, res, next) => {
 
   if (!errors.isEmpty()) {
     req.flash("validationResultErrors", errors);
+    req.flash("old", {
+      username: req.body.username,
+      password: req.body.password,
+    });
     return res.redirect("back");
   }
 
@@ -131,9 +134,8 @@ exports.validateSignup = () => {
       .isEmail()
       .withMessage("Tên đăng nhập phải là email")
       .custom((value) => {
-        return User.findOne({ username: value })
-        .then((user) => {
-          if(user){
+        return User.findOne({ username: value }).then((user) => {
+          if (user) {
             throw new Error("Tên đăng nhập đã được sử dụng");
           }
         });

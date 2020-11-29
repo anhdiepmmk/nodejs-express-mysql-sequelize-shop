@@ -13,19 +13,50 @@
             <% } %>
             <div class="form-control">
                 <label for="title">Title</label>
-                <input type="text" name="title" id="title" value="<% if (editing) { %><%= product.title %><% } %>">
+                <input 
+                    type="text" 
+                    name="title" 
+                    id="title" 
+                    value="<%= old && old.title ? old.title : '' %>"
+                >
+                <div class="validate-error"><%= validationResultErrors !== undefined 
+                    ? validationResultErrors.errors.filter(e => e.param === 'title').map(e => e.msg).join(', ')
+                    : '' %></div>
             </div>
             <div class="form-control">
                 <label for="imageUrl">Image URL</label>
-                <input type="text" name="imageUrl" id="imageUrl" value="<% if (editing) { %><%= product.imageUrl %><% } %>">
+                <input 
+                    type="text" 
+                    name="imageUrl" 
+                    id="imageUrl" 
+                    value="<%= old && old.imageUrl ? old.imageUrl : '' %>"
+                >
+                <div class="validate-error"><%= validationResultErrors !== undefined 
+                    ? validationResultErrors.errors.filter(e => e.param === 'imageUrl').map(e => e.msg).join(', ')
+                    : '' %></div>
             </div>
             <div class="form-control">
                 <label for="price">Price</label>
-                <input type="number" name="price" id="price" step="0.01" value="<% if (editing) { %><%= product.price %><% } %>">
+                <input 
+                    type="number"
+                    name="price" 
+                    id="price" 
+                    step="0.01" 
+                    value="<%= old && old.price ? old.price : '' %>"
+                >
+                <div class="validate-error"><%= validationResultErrors !== undefined 
+                    ? validationResultErrors.errors.filter(e => e.param === 'price').map(e => e.msg).join(', ')
+                    : '' %></div>
             </div>
             <div class="form-control">
                 <label for="description">Description</label>
-                <textarea name="description" id="description" rows="5"><% if (editing) { %><%= product.description %><% } %></textarea>
+                <textarea 
+                name="description" 
+                id="description" 
+                rows="5"><%= old && old.description ? old.description : '' %></textarea>
+                <div class="validate-error"><%= validationResultErrors !== undefined 
+                    ? validationResultErrors.errors.filter(e => e.param === 'description').map(e => e.msg).join(', ')
+                    : '' %></div>
             </div>
             <% if (editing) { %>
                 <input type="hidden" value="<%= product._id %>" name="productId">

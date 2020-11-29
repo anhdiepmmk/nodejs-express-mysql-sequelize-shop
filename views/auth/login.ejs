@@ -12,14 +12,24 @@
                 <% } %>
                 <div class="form-control">
                     <label for="username">User name</label>
-                    <input type="text" name="username" id="username">
+                    <input 
+                        type="text" 
+                        name="username" 
+                        id="username"
+                        value="<%= old && old.username ? old.username : '' %>"
+                    >
                     <div class="validate-error"><%= validationResultErrors !== undefined 
                         ? validationResultErrors.errors.filter(e => e.param === 'username').map(e => e.msg).join(', ')
                         : '' %></div>
                 </div>
                 <div class="form-control">
                     <label for="password">Password</label>
-                    <input type="password" name="password" id="password">
+                    <input 
+                        type="password" 
+                        name="password" 
+                        id="password"
+                        value="<%= old && old.password ? old.password : '' %>"
+                    >
                     <div class="validate-error"><%= validationResultErrors !== undefined 
                         ? validationResultErrors.errors.filter(e => e.param === 'password').map(e => e.msg).join(', ')
                         : '' %></div>
