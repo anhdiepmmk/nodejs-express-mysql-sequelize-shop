@@ -56,6 +56,14 @@ exports.postLogin = async (req, res, next) => {
     .bail()
     .isEmail()
     .withMessage("Tên đăng nhập không hợp lệ")
+    .bail()
+    .custom((value) => {
+      return User.findOne({ username: value }).then((user) => {
+        if (!user) {
+          throw new Error("User not found!");
+        }
+      });
+    })
     .run(req);
 
   await body("password")
@@ -79,11 +87,7 @@ exports.postLogin = async (req, res, next) => {
 
   User.findOne({ username })
     .then((user) => {
-      if (!user) {
-        req.flash("message", "User not found!");
-        return res.redirect("/login");
-      } else {
-        bcrypt
+      bcrypt
           .compare(password, user.password)
           .then((result) => {
             if (result) {
@@ -101,7 +105,6 @@ exports.postLogin = async (req, res, next) => {
             req.flash("message", "Something went wrong!");
             res.redirect("/login");
           });
-      }
     })
     .catch((err) => {
       next(err);

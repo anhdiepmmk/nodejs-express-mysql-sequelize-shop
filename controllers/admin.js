@@ -2,6 +2,7 @@ const Product = require("../models/product");
 const { body, validationResult } = require("express-validator");
 const NotFoundError = require("../errors/NotFoundError");
 
+
 exports.getValidateProduct = () => {
   return [
     body("title")
@@ -13,17 +14,17 @@ exports.getValidateProduct = () => {
       })
       .withMessage("Tiêu đề không được dài quá 255 ký tự"),
 
-    body("imageUrl")
-      .notEmpty()
-      .withMessage("Image URL không được bỏ trống")
-      .bail()
-      .isLength({
-        max: 255,
-      })
-      .withMessage("Image URL không được dài quá 255 ký tự")
-      .bail()
-      .isURL()
-      .withMessage("Image URL không hợp lệ"),
+    // body("imageUrl")
+    //   .notEmpty()
+    //   .withMessage("Image URL không được bỏ trống")
+    //   .bail()
+    //   .isLength({
+    //     max: 255,
+    //   })
+    //   .withMessage("Image URL không được dài quá 255 ký tự")
+    //   .bail()
+    //   .isURL()
+    //   .withMessage("Image URL không hợp lệ"),
 
     body("price")
       .notEmpty()
@@ -56,6 +57,9 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
+  console.log(req.file);
+  return res.send(req.file);
+
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
