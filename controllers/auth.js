@@ -1,9 +1,12 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
+const { body, validationResult } = require('express-validator');
+
 
 const nodemailer = require("nodemailer");
 const sendgridTransport = require("nodemailer-sendgrid-transport");
+const { json } = require("body-parser");
 
 const sendMailBySendGridTransporter = (payload) => {
   //create new transporter by send grid
@@ -38,14 +41,31 @@ const sendMailBySMTPTransporter = (payload) => {
 };
 
 exports.getLogin = (req, res, next) => {
+  const validationResultErrors = req.flash('validationResultErrors')
+  
   res.render("auth/login", {
     pageTitle: "Login",
     path: "/login",
     message: req.flash("message"),
+    validationResultErrors: validationResultErrors.shift()
   });
 };
 
-exports.postLogin = (req, res, next) => {
+exports.postLogin = async (req, res, next) => {
+  await body('username')
+  .notEmpty().withMessage('Bạn chưa nhập tên tài khoản').bail()
+  .isEmail().withMessage('Tên đăng nhập không hợp lệ')
+  .run(req);
+
+  await body('password').notEmpty().withMessage('Bạn chưa nhập mật khẩu').run(req);
+
+  const errors = validationResult(req)
+
+  if(!errors.isEmpty()){
+    req.flash('validationResultErrors', errors);
+    return res.redirect('back');
+  }
+
   const username = req.body.username;
   const password = req.body.password;
 
