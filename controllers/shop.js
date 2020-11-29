@@ -11,7 +11,7 @@ exports.getProducts = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      next(err);
     });
 };
 
@@ -27,7 +27,7 @@ exports.getProduct = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      next(err);
     });
 };
 
@@ -41,7 +41,7 @@ exports.getIndex = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      next(err);
     });
 };
 
@@ -58,7 +58,7 @@ exports.getCart = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      next(err);
     });
 };
 
@@ -73,7 +73,7 @@ exports.postCart = (req, res, next) => {
       res.redirect("/cart");
     })
     .catch((err) => {
-      console.log(err);
+      next(err);
     });
 };
 
@@ -87,7 +87,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
       res.redirect("/cart");
     })
     .catch((err) => {
-      console.log(err);
+      next(err);
     });
 };
 
@@ -117,7 +117,7 @@ exports.postOrder = (req, res, next) => {
       return res.redirect("/orders");
     })
     .catch((err) => {
-      console.log(err);
+      next(err);
     });
 };
 
@@ -131,7 +131,7 @@ exports.getOrders = (req, res, next) => {
       });
     })
     .catch((err) => {
-      res.end();
+      next(err);
     });
 
   return;

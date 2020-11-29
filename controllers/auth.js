@@ -104,7 +104,7 @@ exports.postLogin = async (req, res, next) => {
       }
     })
     .catch((err) => {
-      console.log(err);
+      next(err);
     });
 };
 
@@ -210,12 +210,12 @@ exports.postSignup = (req, res, next) => {
               });
           })
           .catch((err) => {
-            console.log(err);
+            next(err);
           });
       }
     })
     .catch((err) => {
-      console.log(err);
+      next(err);
     });
 };
 
@@ -268,7 +268,7 @@ exports.postReset = (req, res, next) => {
           }
         })
         .catch((err) => {
-          console.log(err);
+          next(err);
         });
     }
   });
@@ -299,7 +299,7 @@ exports.getNewPassword = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      next(err);
     });
 };
 
@@ -336,6 +336,6 @@ exports.postNewPassword = (req, res, next) => {
       }
     })
     .catch((err) => {
-      console.log(err);
+      next(err);
     });
 };

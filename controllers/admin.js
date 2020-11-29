@@ -151,7 +151,7 @@ exports.postEditProduct = (req, res, next) => {
             res.redirect("back");
           })
           .catch((err) => {
-            console.log(err);
+            next(err);
           });
       } else {
         req.flash("message", "Permission denied.");
@@ -159,7 +159,7 @@ exports.postEditProduct = (req, res, next) => {
       }
     })
     .catch((err) => {
-      console.log(err);
+      next(err);
     });
 };
 
@@ -173,7 +173,7 @@ exports.getProducts = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      next(err);
     });
 };
 
