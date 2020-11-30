@@ -85,7 +85,11 @@ exports.postAddProduct = (req, res, next) => {
   }
 
   if (!errors.isEmpty()) {
-    console.log(errors);
+    console.log(
+      errors,
+      "================mapped================",
+      errors.mapped()
+    );
     req.flash("validationResultErrors", errors);
     req.flash("old", {
       title: req.body.title,
@@ -184,13 +188,13 @@ exports.postEditProduct = (req, res, next) => {
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
   const updatedDesc = req.body.description;
-  const updatedImage = req.files.image;
 
   Product.findById(prodId)
     .then((product) => {
       console.log(product);
       if (product.userId.toString() === req.user._id.toString()) {
-        if (updatedImage) {
+        if (req.files && req.files.image) {
+          const updatedImage = req.files.image;
           console.log("updatedImage", updatedImage);
           const filename =
             "uploads/product_photo/" +
