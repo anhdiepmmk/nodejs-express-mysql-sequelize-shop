@@ -1,10 +1,10 @@
 const Product = require("../models/product");
 const { body, validationResult } = require("express-validator");
 const NotFoundError = require("../errors/NotFoundError");
-
+const fs = require("fs");
 
 exports.getValidateProduct = () => {
-  return [
+  let results = [
     body("title")
       .notEmpty()
       .withMessage("Tiêu đề không được bỏ trống")
@@ -13,18 +13,6 @@ exports.getValidateProduct = () => {
         max: 255,
       })
       .withMessage("Tiêu đề không được dài quá 255 ký tự"),
-
-    // body("imageUrl")
-    //   .notEmpty()
-    //   .withMessage("Image URL không được bỏ trống")
-    //   .bail()
-    //   .isLength({
-    //     max: 255,
-    //   })
-    //   .withMessage("Image URL không được dài quá 255 ký tự")
-    //   .bail()
-    //   .isURL()
-    //   .withMessage("Image URL không hợp lệ"),
 
     body("price")
       .notEmpty()
@@ -42,6 +30,24 @@ exports.getValidateProduct = () => {
       })
       .withMessage("Mô tả không được dài quá 255 ký tự"),
   ];
+
+  // if (mode === "add") {
+  //   results.push(
+  //     body("image")
+  //     .custom((value, { req }) => {
+  //       if (req.files && req.files.image) {
+  //         const allowedMimetype = ["image/png", "image/jpg", "image/jpeg"];
+  //         if (!allowedMimetype.includes(req.files.image.mimetype)) {
+  //           throw new Error("File không đúng định dạng");
+  //         }
+  //       } else {
+  //         throw new Error("Vui lòng chọn image");
+  //       }
+  //     })
+  //   );
+  // }
+
+  return results;
 };
 
 exports.getAddProduct = (req, res, next) => {
@@ -57,24 +63,52 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
-  console.log(req.file);
-  return res.send(req.file);
-
   const errors = validationResult(req);
 
+  if (req.files && req.files.image) {
+    const allowedMimetype = ["image/png", "image/jpg", "image/jpeg"];
+    if (!allowedMimetype.includes(req.files.image.mimetype)) {
+      errors.errors.push({
+        value: undefined,
+        msg: "File không đúng định dạng",
+        param: "image",
+        location: "body",
+      });
+    }
+  } else {
+    errors.errors.push({
+      value: undefined,
+      msg: "Vui lòng chọn image",
+      param: "image",
+      location: "body",
+    });
+  }
+
   if (!errors.isEmpty()) {
+    console.log(errors);
     req.flash("validationResultErrors", errors);
     req.flash("old", {
       title: req.body.title,
-      imageUrl: req.body.imageUrl,
       price: req.body.price,
       description: req.body.description,
     });
     return res.redirect("back");
   }
 
+  const image = req.files.image;
+  const filename = "uploads/product_photo/" + image.name;
+  image
+    .mv("./public/" + filename)
+    .then((result) => {
+      console.log(`Moved ${filename}`, result);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  console.log(image);
+
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
+  const imageUrl = filename;
   const price = req.body.price;
   const description = req.body.description;
   const userId = req.user._id;
@@ -103,7 +137,7 @@ exports.getEditProduct = (req, res, next) => {
   Product.findById(prodId)
     .then((product) => {
       if (!product) {
-        throw new NotFoundError('Product not found')
+        throw new NotFoundError("Product not found");
       }
 
       res.render("admin/edit-product", {
@@ -124,11 +158,22 @@ exports.getEditProduct = (req, res, next) => {
 exports.postEditProduct = (req, res, next) => {
   const errors = validationResult(req);
 
+  if (req.files && req.files.image) {
+    const allowedMimetype = ["image/png", "image/jpg", "image/jpeg"];
+    if (!allowedMimetype.includes(req.files.image.mimetype)) {
+      errors.errors.push({
+        value: undefined,
+        msg: "File không đúng định dạng",
+        param: "image",
+        location: "body",
+      });
+    }
+  }
+
   if (!errors.isEmpty()) {
     req.flash("validationResultErrors", errors);
     req.flash("old", {
       title: req.body.title,
-      imageUrl: req.body.imageUrl,
       price: req.body.price,
       description: req.body.description,
     });
@@ -138,16 +183,41 @@ exports.postEditProduct = (req, res, next) => {
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
-  const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
+  const updatedImage = req.files.image;
 
   Product.findById(prodId)
     .then((product) => {
       console.log(product);
       if (product.userId.toString() === req.user._id.toString()) {
+        if (updatedImage) {
+          console.log("updatedImage", updatedImage);
+          const filename =
+            "uploads/product_photo/" +
+            Date.now() +
+            "." +
+            updatedImage.mimetype.split("/").pop();
+
+          updatedImage
+            .mv("./public/" + filename)
+            .then((result) => {
+              console.log(`Moved ${filename}`, result);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+
+          //remove file
+          const imageUrl = product.imageUrl;
+          fs.unlink("./public/" + imageUrl, (err) => {
+            console.log(err);
+          });
+
+          product.imageUrl = filename;
+        }
+
         product.title = updatedTitle;
         product.price = updatedPrice;
-        product.imageUrl = updatedImageUrl;
         product.description = updatedDesc;
         product
           .save()

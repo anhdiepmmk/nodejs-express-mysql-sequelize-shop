@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const path = require("path");
 const flash = require("connect-flash");
 const csrf = require("csurf");
+const fileUpload = require('express-fileupload')
 
 const errorController = require("./controllers/error");
 
@@ -23,6 +24,14 @@ const User = require("./models/user");
 const NotFoundError = require("./errors/NotFoundError");
 
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(
+  fileUpload({
+    createParentPath: true,
+    useTempFiles: true,
+    tempFileDir: "/tmp/",
+    limits: { fileSize: 50 * 1024 * 1024 },
+  })
+);
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use(
@@ -70,12 +79,12 @@ app.use(authRoutes);
 app.use(errorController.get404);
 
 app.use((err, req, res, next) => {
-  if(err instanceof NotFoundError){
-    res.status(err.httpStatusCode).send(err.message)
-  }else{
-    res.status(500).render('error', {
-      pageTitle: 'Error!',
-      path: '/error',
+  if (err instanceof NotFoundError) {
+    res.status(err.httpStatusCode).send(err.message);
+  } else {
+    res.status(500).render("error", {
+      pageTitle: "Error!",
+      path: "/error",
       err: err,
     });
   }
