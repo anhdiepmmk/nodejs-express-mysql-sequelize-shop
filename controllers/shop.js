@@ -159,18 +159,23 @@ exports.getInvoice = (req, res, next) => {
         next(new Error('Order not found.'));
       }else{
         if(order.user.userId.toString() === req.session.user._id.toString()){
-          fs.readFile(invoicePath, (err, data) => {
-            if (err) {
-              next(err);
-            } else {
-              res.setHeader("Content-Type", "application/pdf");
-              res.setHeader(
-                "Content-Disposition",
-                'inline; filename="' + invoiceName + '"'
-              );
-              res.send(data);
-            }
-          });
+          // fs.readFile(invoicePath, (err, data) => {
+          //   if (err) {
+          //     next(err);
+          //   } else {
+          //     res.setHeader("Content-Type", "application/pdf");
+          //     res.setHeader(
+          //       "Content-Disposition",
+          //       'inline; filename="' + invoiceName + '"'
+          //     );
+          //     res.send(data);
+          //   }
+          // });
+
+          const filestream = fs.createReadStream(invoicePath)
+          res.setHeader("Content-Type", "application/pdf");
+          res.setHeader("Content-Disposition", 'inline; filename="' + invoiceName + '"');
+          filestream.pipe(res)
         }else{
           next(new Error('Unauthorized'));
         }
