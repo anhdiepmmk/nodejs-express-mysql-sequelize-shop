@@ -256,10 +256,15 @@ exports.getProducts = (req, res, next) => {
     });
 };
 
-exports.postDeleteProduct = (req, res, next) => {
-  const prodId = req.body.productId;
+
+exports.deleteProduct = (req, res, next) => {
+  const prodId = req.params.productId;
 
   Product.deleteOne({ _id: prodId, userId: req.user._id }, (err) => {
-    res.redirect("/admin/products");
+    if (err) {
+      res.status(500).json({ message: 'Deleting product failed.' })
+    } else {
+      res.status(200).json({ message: 'Success!' })
+    }
   });
 };
