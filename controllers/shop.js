@@ -2,17 +2,23 @@ const Product = require("../models/product");
 const Order = require("../models/order");
 const fs = require("fs");
 const path = require("path");
-const order = require("../models/order");
-const { Int32 } = require("mongodb");
 
-exports.getProducts = (req, res, next) => {
-  console.log("getProducts", page);
+const ITEM_PER_PAGE = 1
+
+exports.getProducts = async (req, res, next) => {
+  const current = +req.query.page || 1
+  const pages = await Product.find().countDocuments();
+
   Product.find()
+    .skip((current - 1) * ITEM_PER_PAGE)
+    .limit(ITEM_PER_PAGE)
     .then((products) => {
       res.render("shop/product-list", {
         prods: products,
         pageTitle: "All Products",
         path: "/products",
+        pages: pages,
+        current: current,
       });
     })
     .catch((err) => {
@@ -36,29 +42,21 @@ exports.getProduct = (req, res, next) => {
     });
 };
 
-const ITEM_PER_PAGE = 1
 
 exports.getIndex = async (req, res, next) => {
-  const page = +req.query.page || 1
-
-  const totalItems = await Product.find().countDocuments();
+  const current = +req.query.page || 1
+  const pages = await Product.find().countDocuments();
 
   Product.find()
-    .skip((page - 1) * ITEM_PER_PAGE)
+    .skip((current - 1) * ITEM_PER_PAGE)
     .limit(ITEM_PER_PAGE)
     .then((products) => {
       res.render("shop/index", {
         prods: products,
         pageTitle: "Shop",
         path: "/",
-        pages: +totalItems,
-        current: +page,
-        // currentPage: +page,
-        // hasPreviousPage: page > 1,
-        // hasNextPage: ITEM_PER_PAGE * page < totalItems,
-        // nextPage: page + 1,
-        // previousPage: page - 1,
-        // lastPage: Math.ceil(totalItems / ITEM_PER_PAGE)
+        pages: pages,
+        current: current,
       });
     })
     .catch((err) => {
