@@ -262,3 +262,46 @@ form {
 .padding-1_5rem {
   padding: 1.5rem;
 }
+
+.pagination {
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  font-size: 0px;
+  margin-top: 1rem;
+}
+
+.pagination li{
+  list-style: none;
+  display: inline;
+  font-size: 14px;
+}
+
+.pagination li:not(:last-child){
+  margin-right: 0.5rem;
+}
+
+.pagination li a{
+  padding: 0.5rem 1.0rem;
+  border: 1px solid #00695c;
+  color: #00695c;
+  text-decoration: none;
+  border-radius: 2px;
+}
+
+.pagination li.disabled a{
+  color: white;
+  background-color: grey;
+  border-color: grey;
+  cursor: default;
+}
+
+.pagination li:not(.disabled) a:hover,
+.pagination li.active a{
+  color: white;
+  background-color: #00695c;
+}
+
+.pagination li.active a{
+  cursor: default;
+}

@@ -3,8 +3,10 @@ const Order = require("../models/order");
 const fs = require("fs");
 const path = require("path");
 const order = require("../models/order");
+const { Int32 } = require("mongodb");
 
 exports.getProducts = (req, res, next) => {
+  console.log("getProducts", page);
   Product.find()
     .then((products) => {
       res.render("shop/product-list", {
@@ -34,13 +36,29 @@ exports.getProduct = (req, res, next) => {
     });
 };
 
-exports.getIndex = (req, res, next) => {
+const ITEM_PER_PAGE = 1
+
+exports.getIndex = async (req, res, next) => {
+  const page = +req.query.page || 1
+
+  const totalItems = await Product.find().countDocuments();
+
   Product.find()
+    .skip((page - 1) * ITEM_PER_PAGE)
+    .limit(ITEM_PER_PAGE)
     .then((products) => {
       res.render("shop/index", {
         prods: products,
         pageTitle: "Shop",
         path: "/",
+        pages: +totalItems,
+        current: +page,
+        // currentPage: +page,
+        // hasPreviousPage: page > 1,
+        // hasNextPage: ITEM_PER_PAGE * page < totalItems,
+        // nextPage: page + 1,
+        // previousPage: page - 1,
+        // lastPage: Math.ceil(totalItems / ITEM_PER_PAGE)
       });
     })
     .catch((err) => {
@@ -155,10 +173,10 @@ exports.getInvoice = (req, res, next) => {
 
   Order.findById(orderId)
     .then((order) => {
-      if(!order){
+      if (!order) {
         next(new Error('Order not found.'));
-      }else{
-        if(order.user.userId.toString() === req.session.user._id.toString()){
+      } else {
+        if (order.user.userId.toString() === req.session.user._id.toString()) {
           // fs.readFile(invoicePath, (err, data) => {
           //   if (err) {
           //     next(err);
@@ -176,7 +194,7 @@ exports.getInvoice = (req, res, next) => {
           res.setHeader("Content-Type", "application/pdf");
           res.setHeader("Content-Disposition", 'inline; filename="' + invoiceName + '"');
           filestream.pipe(res)
-        }else{
+        } else {
           next(new Error('Unauthorized'));
         }
       }

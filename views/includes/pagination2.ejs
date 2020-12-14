@@ -1,0 +1,36 @@
+<% if (pages > 0) { %>
+<ul class="pagination">
+    <!-- Display first page -->
+    <% if (current == 1) { %>
+    <li class="disabled"><a>First</a></li>
+    <% } else { %>
+    <li><a href="/?page=1">First</a></li>
+    <% } %>
+
+    <!-- Display three dot before -->
+    <% var i = (Number(current) > 5 ? Number(current) - 4 : 1) %>
+    <% if (i !== 1) { %>
+    <li class="disabled"><a>...</a></li>
+    <% } %>
+
+    <% for (; i <= (Number(current) + 4) && i <= pages; i++) { %>
+    <% if (i == current) { %>
+    <li class="active"><a><%= i %></a></li>
+    <% } else { %>
+    <li><a href="/?page=<%= i %>"><%= i %></a></li>
+    <% } %>
+
+    <!-- Display three dot after -->
+    <% if (i == Number(current) + 4 && i < pages) { %>
+    <li class="disabled"><a>...</a></li>
+    <% } %>
+    <% } %>
+
+    <!-- Display last page -->
+    <% if (current == pages) { %>
+    <li class="disabled"><a>Last</a></li>
+    <% } else { %>
+    <li><a href="/?page=<%= pages %>">Last</a></li>
+    <% } %>
+</ul>
+<% } %>

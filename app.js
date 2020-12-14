@@ -60,7 +60,7 @@ app.use((req, res, next) => {
       .catch((err) => {
         console.log(err);
       })
-      .finally(() => {});
+      .finally(() => { });
   } else {
     next();
   }
@@ -91,7 +91,10 @@ app.use((err, req, res, next) => {
 });
 
 mongoose
-  .connect(mongoConnectionString)
+  .connect(mongoConnectionString, {
+    // useNewUrlParser: true,
+    // useUnifiedTopology: true
+  })
   .then((result) => {
     console.log("Mongodb Connected!");
     User.findOne()
