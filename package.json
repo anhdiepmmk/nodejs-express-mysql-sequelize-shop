@@ -1,26 +1,28 @@
 {
-  "name": "nodejs-complete-guide",
+  "name": "nodejs-express-mysql-sequelize-shop",
   "version": "1.0.0",
-  "description": "Complete Node.js Guide",
-  "main": "app.js",
+  "description": "",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js",
-    "start-server": "node app.js"
+    "start": "nodemon app.js"
   },
-  "author": "Maximilian Schwarzmüller",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anhdiepmmk/nodejs-express-mysql-sequelize-shop.git"
+  },
+  "keywords": [],
+  "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "nodemon": "^1.18.3"
+  "bugs": {
+    "url": "https://github.com/anhdiepmmk/nodejs-express-mysql-sequelize-shop/issues"
   },
+  "homepage": "https://github.com/anhdiepmmk/nodejs-express-mysql-sequelize-shop#readme",
   "dependencies": {
-    "body-parser": "^1.18.3",
-    "ejs": "^2.6.1",
-    "express": "^4.16.3",
-    "express-handlebars": "^3.0.0",
-    "mongodb": "^3.6.3",
-    "mysql2": "^1.6.1",
-    "pug": "^2.0.3",
-    "sequelize": "^6.3.5"
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
   }
 }
