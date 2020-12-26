@@ -7,9 +7,13 @@ const path = require('path')
 const fs = require('fs')
 
 exports.getPosts = async (req, res, next) => {
+    const currentPage = req.query.page || 1
+    const perPage = 2
     try {
         const totalItems = await Post.countDocuments({})
-        const posts = await Post.find();
+        const posts = await Post.find()
+            .skip((currentPage - 1) * perPage)
+            .limit(perPage);
 
         res.status(200).json({
             posts: posts,
