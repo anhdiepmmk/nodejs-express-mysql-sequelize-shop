@@ -50,6 +50,8 @@ router.put('/post/:postId',
     ],
     feedController.updatePost)
 
+router.delete('/post/:postId', feedController.deletePost)
+
 router.get('/post/:postId', feedController.getPost)
 
 module.exports = router
