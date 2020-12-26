@@ -1,8 +1,10 @@
 const e = require('cors')
 const { validationResult } = require('express-validator')
 const Post = require('../../models/post.model')
+const User = require('../../models/user.model')
 const ValidationError = require('../errors/validation.error')
 const NotfoundError = require('../errors/notfound.error')
+const ForbiddenError = require('../errors/forbidden.error')
 const path = require('path')
 const fs = require('fs')
 
@@ -13,7 +15,11 @@ exports.getPosts = async (req, res, next) => {
         const totalItems = await Post.countDocuments({})
         const posts = await Post.find()
             .skip((currentPage - 1) * perPage)
-            .limit(perPage);
+            .limit(perPage)
+            .populate('creator', {
+                name: 1
+            })
+            .exec()
 
         res.status(200).json({
             posts: posts,
@@ -24,7 +30,7 @@ exports.getPosts = async (req, res, next) => {
     }
 }
 
-exports.createPost = (req, res, next) => {
+exports.createPost = async (req, res, next) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -38,25 +44,31 @@ exports.createPost = (req, res, next) => {
     const title = req.body.title
     const content = req.body.content
     const imageUrl = req.file.path.substring(req.file.path.indexOf('images'))
+    const userId = req.userId
 
     const post = new Post({
         title: title,
         content: content,
         imageUrl: imageUrl,
-        creator: {
-            name: "Diep"
-        },
+        creator: userId,
     })
 
-    post.save()
-        .then(result => {
-            res.status(201).json({
-                message: "Post created successfully!",
-                post: result
-            })
-        }).catch(e => {
-            next(e)
+    try {
+        const result = await (await post.save()).populate('creator', { name: 1 }).execPopulate()
+
+        //store new post id to user posts array attribute.
+        const user = await User.findById(userId)
+        user.posts.push(result)
+        await user.save()
+
+        res.status(201).json({
+            message: "Post created successfully!",
+            post: result
         })
+    } catch (error) {
+        error.data = error.stack
+        next(error)
+    }
 }
 
 exports.updatePost = async (req, res, next) => {
@@ -76,6 +88,10 @@ exports.updatePost = async (req, res, next) => {
             throw new NotfoundError()
         }
 
+        if (post.creator.toString() !== req.userId.toString()) {
+            throw new ForbiddenError('Not authorized!');
+        }
+
         post.title = title
         post.content = content
 
@@ -84,7 +100,7 @@ exports.updatePost = async (req, res, next) => {
             post.imageUrl = req.file.path.substring(req.file.path.indexOf('images'))
         }
 
-        const result = await post.save();
+        const result = await (await post.save()).populate('creator', { name: 1 }).execPopulate();
         res.status(200).json({
             post: result
         })
@@ -103,6 +119,13 @@ exports.deletePost = async (req, res, next) => {
             throw new NotfoundError();
         }
 
+        if (post.creator.toString() !== req.userId.toString()) {
+            throw new ForbiddenError('Not authorized!');
+        }
+
+        const user = await User.findById(req.userId)
+        user.posts.pull(postId)
+        await user.save()
 
         const imageUrl = post.imageUrl;
         post.remove((err => {
@@ -115,6 +138,8 @@ exports.deletePost = async (req, res, next) => {
                 })
             }
         }));
+
+
     } catch (error) {
         next(error);
     }
@@ -129,7 +154,7 @@ const clearImage = filePath => {
 exports.getPost = async (req, res, next) => {
     const postId = req.params.postId
     try {
-        const post = await Post.findById(postId)
+        const post = await Post.findById(postId).populate('creator', { name: 1 }).exec()
         if (post) {
             res.json({
                 message: 'Post fetched.',

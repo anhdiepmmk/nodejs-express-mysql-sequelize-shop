@@ -3,7 +3,8 @@ const router = express.Router()
 const { body } = require('express-validator')
 const path = require('path')
 const multer = require('multer')
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require('uuid')
+const isAuth = require('../middleware/is-auth')
 
 
 const fileStorage = multer.diskStorage({
@@ -30,10 +31,11 @@ const fileFilter = (req, file, cb) => {
 const feedController = require('../controllers/feed.controller')
 
 // GET /feed/posts
-router.get('/posts', feedController.getPosts)
+router.get('/posts', isAuth, feedController.getPosts)
 
 // POST /feed/post
 router.post('/post',
+    isAuth,
     multer({ storage: fileStorage, fileFilter: fileFilter }).single('image'),
     [
         body('title').trim().isLength({ min: 5, max: 255 }),
@@ -43,6 +45,7 @@ router.post('/post',
 
 // PUT /feed/post
 router.put('/post/:postId',
+    isAuth,
     multer({ storage: fileStorage, fileFilter: fileFilter }).single('image'),
     [
         body('title').trim().isLength({ min: 5, max: 255 }),
@@ -50,8 +53,8 @@ router.put('/post/:postId',
     ],
     feedController.updatePost)
 
-router.delete('/post/:postId', feedController.deletePost)
+router.delete('/post/:postId', isAuth, feedController.deletePost)
 
-router.get('/post/:postId', feedController.getPost)
+router.get('/post/:postId', isAuth, feedController.getPost)
 
 module.exports = router
