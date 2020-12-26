@@ -11,7 +11,9 @@ app.use(cors())
 app.use('/images', express.static(path.join(__dirname, '..', 'public', 'images')))
 
 const feedRoutes = require('./http/routes/feed.router')
+const authRoutes = require('./http/routes/auth.router')
 app.use('/feed', feedRoutes)
+app.user('/auth', authRoutes)
 
 app.use((error, req, res, next) => {
     const httpStatusCode = error.httpStatusCode || 500
