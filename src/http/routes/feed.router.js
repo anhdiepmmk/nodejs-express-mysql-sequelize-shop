@@ -41,6 +41,15 @@ router.post('/post',
     ],
     feedController.createPost)
 
+// PUT /feed/post
+router.put('/post/:postId',
+    multer({ storage: fileStorage, fileFilter: fileFilter }).single('image'),
+    [
+        body('title').trim().isLength({ min: 5, max: 255 }),
+        body('content').trim().isLength({ min: 5, max: 255 })
+    ],
+    feedController.updatePost)
+
 router.get('/post/:postId', feedController.getPost)
 
 module.exports = router

@@ -3,6 +3,8 @@ const { validationResult } = require('express-validator')
 const Post = require('../../models/post.model')
 const ValidationError = require('../errors/validation.error')
 const NotfoundError = require('../errors/notfound.error')
+const path = require('path')
+const fs = require('fs')
 
 exports.getPosts = async (req, res, next) => {
     try {
@@ -31,7 +33,7 @@ exports.createPost = (req, res, next) => {
 
     const title = req.body.title
     const content = req.body.content
-    const imageUrl = req.file.path
+    const imageUrl = req.file.path.substring(req.file.path.indexOf('images'))
 
     const post = new Post({
         title: title,
@@ -51,6 +53,46 @@ exports.createPost = (req, res, next) => {
         }).catch(e => {
             next(e)
         })
+}
+
+exports.updatePost = async (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return next(new ValidationError("Validation failed, entered data is incorrect."));
+    }
+
+    const postId = req.params.postId
+    const title = req.body.title
+    const content = req.body.content
+
+    try {
+        const post = await Post.findById(postId);
+        if (!post) {
+            throw new NotfoundError()
+        }
+
+        post.title = title
+        post.content = content
+
+        if (req.file) {
+            clearImage(post.imageUrl)
+            post.imageUrl = req.file.path.substring(req.file.path.indexOf('images'))
+        }
+
+        const result = await post.save();
+        res.status(200).json({
+            post: result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const clearImage = filePath => {
+    fs.unlink(path.join(__dirname, '..', '..', '..', 'public', filePath), (err) => {
+        console.log(err);
+    })
 }
 
 exports.getPost = async (req, res, next) => {
