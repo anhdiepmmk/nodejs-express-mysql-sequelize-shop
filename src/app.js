@@ -12,8 +12,11 @@ app.use('/images', express.static(path.join(__dirname, '..', 'public', 'images')
 
 const feedRoutes = require('./http/routes/feed.router')
 const authRoutes = require('./http/routes/auth.router')
+const userRoutes = require('./http/routes/user.router')
+
 app.use('/feed', feedRoutes)
 app.use('/auth', authRoutes)
+app.use('/user', userRoutes)
 
 app.use((error, req, res, next) => {
     const httpStatusCode = error.httpStatusCode || 500

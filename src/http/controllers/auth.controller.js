@@ -4,6 +4,7 @@ const UnauthorizedError = require('../errors/unauthorized.error')
 const bcrypt = require('bcryptjs')
 const { validationResult } = require('express-validator')
 const jwt = require('jsonwebtoken')
+const NotfoundError = require('../errors/notfound.error')
 
 exports.signup = async (req, res, next) => {
     const errors = validationResult(req)
