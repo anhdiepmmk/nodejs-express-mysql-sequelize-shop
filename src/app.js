@@ -33,6 +33,13 @@ mongoose.connect('mongodb://course:course2123@localhost:27017/messages?authSourc
     .then(e => console.log('Mongodb connected'))
     .catch(e => console.log('Mongodb connection failed'))
 
-app.listen(8080, () => {
+const server = app.listen(8080, () => {
     console.log('Express running at 8080 port!');
 })
+
+const io = require('./utility/socket').init(server)
+
+io.on('connection', socket => {
+    console.log('Client connected!');
+})
+console.log('Mongodb connected')

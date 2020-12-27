@@ -7,6 +7,7 @@ const NotfoundError = require('../errors/notfound.error')
 const ForbiddenError = require('../errors/forbidden.error')
 const path = require('path')
 const fs = require('fs')
+const io = require('../../utility/socket')
 
 exports.getPosts = async (req, res, next) => {
     const currentPage = req.query.page || 1
@@ -16,10 +17,10 @@ exports.getPosts = async (req, res, next) => {
         const posts = await Post.find()
             .skip((currentPage - 1) * perPage)
             .limit(perPage)
+            .sort({ createdAt: -1 })
             .populate('creator', {
                 name: 1
             })
-            .exec()
 
         res.status(200).json({
             posts: posts,
@@ -61,6 +62,8 @@ exports.createPost = async (req, res, next) => {
         user.posts.push(result)
         await user.save()
 
+        io.getIO().emit('posts', { action: 'create', post: result })
+
         res.status(201).json({
             message: "Post created successfully!",
             post: result
@@ -83,12 +86,12 @@ exports.updatePost = async (req, res, next) => {
     const content = req.body.content
 
     try {
-        const post = await Post.findById(postId);
+        const post = await Post.findById(postId).populate('creator', { name: 1 });
         if (!post) {
             throw new NotfoundError()
         }
 
-        if (post.creator.toString() !== req.userId.toString()) {
+        if (post.creator._id.toString() !== req.userId.toString()) {
             throw new ForbiddenError('Not authorized!');
         }
 
@@ -100,7 +103,8 @@ exports.updatePost = async (req, res, next) => {
             post.imageUrl = req.file.path.substring(req.file.path.indexOf('images'))
         }
 
-        const result = await (await post.save()).populate('creator', { name: 1 }).execPopulate();
+        const result = await post.save();
+        io.getIO().emit('posts', { action: 'update', post: result })
         res.status(200).json({
             post: result
         })
@@ -136,6 +140,8 @@ exports.deletePost = async (req, res, next) => {
                 res.status(200).json({
                     message: "Deleted post."
                 })
+
+                io.getIO().emit('posts', { action: 'delete', post: postId })
             }
         }));
 
