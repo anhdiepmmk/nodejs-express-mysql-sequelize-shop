@@ -3,6 +3,27 @@ const User = require('./../../models/user.model')
 const Post = require('./../../models/post.model')
 const validator = require('validator')
 const jwt = require('jsonwebtoken')
+const fs = require('fs')
+const { v4: uuidv4 } = require('uuid')
+
+const storeFS = ({ stream, filename }) => {
+    filename = uuidv4() + '.' + filename.split('.').pop()
+    const uploadDir = './public/images';
+    const path = `${uploadDir}/${filename}`;
+    return new Promise((resolve, reject) =>
+        stream
+            .on('error', error => {
+                if (stream.truncated)
+                    // delete the truncated file
+                    fs.unlinkSync(path);
+                reject(error);
+            })
+            .pipe(fs.createWriteStream(path))
+            .on('error', error => reject(error))
+            .on('finish', () => resolve({ path }))
+    );
+}
+
 module.exports = {
     createUser: async function ({ userInput }, req) {
 
@@ -158,5 +179,13 @@ module.exports = {
                 }
             })
         }
+    },
+
+    singleUpload: async function ({ file }, req) {
+        const { filename, mimetype, encoding, createReadStream } = file.file
+        const stream = createReadStream();
+        const { path } = await storeFS({ stream, filename });
+        console.log(path);
+        return true
     }
 }

@@ -5,6 +5,7 @@ const app = express()
 const mongoose = require('mongoose')
 const path = require('path')
 const { graphqlHTTP } = require('express-graphql')
+const { graphqlUploadExpress } = require('graphql-upload')
 
 const graphqlSchema = require('./http/graphql/schema')
 const graphqlResolvers = require('./http/graphql/resolvers')
@@ -17,25 +18,27 @@ app.use('/images', express.static(path.join(__dirname, '..', 'public', 'images')
 
 app.use(auth)
 
-app.use('/graphql', graphqlHTTP({
-    schema: graphqlSchema,
-    rootValue: graphqlResolvers,
-    graphiql: true,
-    formatError(err) {
-        if (!err.originalError) {
-            return err
-        }
+app.use('/graphql',
+    graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }),
+    graphqlHTTP({
+        schema: graphqlSchema,
+        rootValue: graphqlResolvers,
+        graphiql: true,
+        formatError(err) {
+            if (!err.originalError) {
+                return err
+            }
 
-        const data = err.originalError.data
-        const message = err.originalError.message || 'An error occurred.'
-        const code = err.originalError.code || 500
-        return {
-            message: message,
-            status: code,
-            data: data
+            const data = err.originalError.data
+            const message = err.originalError.message || 'An error occurred.'
+            const code = err.originalError.code || 500
+            return {
+                message: message,
+                status: code,
+                data: data
+            }
         }
-    }
-}))
+    }))
 
 app.use((error, req, res, next) => {
     const httpStatusCode = error.httpStatusCode || 500
@@ -52,6 +55,6 @@ mongoose.connect('mongodb://course:course2123@localhost:27017/messages?authSourc
     .then(e => console.log('Mongodb connected'))
     .catch(e => console.log('Mongodb connection failed'))
 
-const server = app.listen(8080, () => {
-    console.log('Express running at 8080 port!');
+const server = app.listen(8081, () => {
+    console.log('Express running at 8081 port!');
 })
