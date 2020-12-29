@@ -317,6 +317,14 @@ module.exports = {
             throw error
         }
 
+        const user = await User.findById(req.userId)
+
+        if (!user) {
+            const error = new Error('Invalid user.')
+            error.code = 401
+            throw error
+        }
+
         const post = await Post.findById(id).populate('creator')
 
         if (!post) {
@@ -325,14 +333,22 @@ module.exports = {
             throw error
         }
 
+        if (post.creator._id.toString() !== req.userId.toString()) {
+            const error = new Error('Not authorized!')
+            error.code = 401
+            throw error
+        }
+
         const imageUrl = post.imageUrl
 
         return new Promise((resolve, reject) => {
-            post.remove((err => {
+            post.remove((async err => {
                 if (err) {
                     reject(err)
                 } else {
                     clearImage(imageUrl)
+                    user.posts.pull(id)
+                    await user.save()
                     resolve(true)
                 }
             }));
