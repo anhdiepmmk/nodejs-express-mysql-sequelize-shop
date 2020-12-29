@@ -5,6 +5,7 @@ const validator = require('validator')
 const jwt = require('jsonwebtoken')
 const fs = require('fs')
 const { v4: uuidv4 } = require('uuid')
+const path = require('path')
 
 const storeFS = ({ stream, filename }) => {
     filename = uuidv4() + '.' + filename.split('.').pop()
@@ -24,9 +25,14 @@ const storeFS = ({ stream, filename }) => {
     );
 }
 
+const clearImage = filePath => {
+    fs.unlink(path.join(__dirname, '..', '..', '..', 'public', filePath), (err) => {
+        console.log(err);
+    })
+}
+
 module.exports = {
     createUser: async function ({ userInput }, req) {
-
         const errors = []
         if (!validator.isEmail(userInput.email)) {
             errors.push({ message: 'E-Mail is invalid.' })
@@ -92,6 +98,8 @@ module.exports = {
     },
 
     createPost: async function ({ postInput }, req) {
+        console.log(req, req.userId, req.isAuth);
+
         if (!req.isAuth) {
             const error = new Error('Not authenticated!')
             error.code = 401
@@ -169,6 +177,85 @@ module.exports = {
         }
     },
 
+    updatePost: async function ({ id, postInput }, req) {
+        if (!req.isAuth) {
+            const error = new Error('Not authenticated!')
+            error.code = 401
+            throw error
+        }
+
+        const errors = []
+
+        if (validator.isEmpty(postInput.title) ||
+            !validator.isLength(postInput.title, { min: 5 })) {
+            errors.push({
+                message: 'Title is invalid.'
+            })
+        }
+
+        if (validator.isEmpty(postInput.content) ||
+            !validator.isLength(postInput.content, { min: 5 })) {
+            errors.push({
+                message: 'Content is invalid.'
+            })
+        }
+
+        const file = postInput.file
+        if (file && file.file) {
+            const { mimetype } = file.file
+
+            if (mimetype !== 'image/png' &&
+                mimetype !== 'image/jpg' &&
+                mimetype !== 'image/jpeg') {
+                errors.push({
+                    message: 'File type not allowed.'
+                })
+            }
+        }
+
+        if (errors.length > 0) {
+            const error = new Error('Invalid input.')
+            error.data = errors
+            error.code = 422
+            throw error
+        }
+
+        const post = await Post.findById(id).populate('creator')
+
+        if (!post) {
+            const error = new Error('Post not found.')
+            error.code = 404
+            throw error
+        }
+
+        if (post.creator._id.toString() !== req.userId.toString()) {
+            const error = new Error('Not authorized!')
+            error.code = 401
+            throw error
+        }
+
+        post.title = postInput.title
+        post.content = postInput.content
+
+        if (file && file.file) {
+            const { filename, createReadStream } = file.file
+            const stream = createReadStream();
+            const { path } = await storeFS({ stream, filename });
+            //remove old image
+            clearImage(post.imageUrl)
+            post.imageUrl = path.substring(path.indexOf('images/'));
+        }
+
+        const updatedPost = await post.save()
+
+        return {
+            ...updatedPost._doc,
+            _id: updatedPost._id.toString(),
+            createdAt: updatedPost.createdAt.toISOString(),
+            updatedAt: updatedPost.updatedAt.toISOString()
+        }
+    },
+
     posts: async function ({ page }, req) {
         if (!req.isAuth) {
             const error = new Error('Not authenticated!')
@@ -200,6 +287,58 @@ module.exports = {
                 }
             })
         }
+    },
+
+    post: async function ({ id }, req) {
+        if (!req.isAuth) {
+            const error = new Error('Not authenticated!')
+            error.code = 401
+            throw error
+        }
+
+        const post = await Post.findById(id).populate('creator')
+
+        if (!post) {
+            const error = new Error('Post not found.')
+            error.code = 404
+            throw error
+        }
+
+        return {
+            ...post._doc,
+            _id: post._id.toString(),
+            createdAt: post.createdAt.toISOString(),
+            updatedAt: post.updatedAt.toISOString()
+        }
+    },
+
+    deletePost: async function ({ id }, req) {
+        if (!req.isAuth) {
+            const error = new Error('Not authenticated!')
+            error.code = 401
+            throw error
+        }
+
+        const post = await Post.findById(id).populate('creator')
+
+        if (!post) {
+            const error = new Error('Post not found.')
+            error.code = 404
+            throw error
+        }
+
+        const imageUrl = post.imageUrl
+
+        return new Promise((resolve, reject) => {
+            post.remove((err => {
+                if (err) {
+                    reject(err)
+                } else {
+                    clearImage(imageUrl)
+                    resolve(true)
+                }
+            }));
+        })
     },
 
     singleUpload: async function ({ file, message }, req) {
