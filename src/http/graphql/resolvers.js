@@ -114,6 +114,24 @@ module.exports = {
             })
         }
 
+        const file = postInput.file
+
+        if (!file) {
+            errors.push({
+                message: 'File is required.'
+            })
+        }
+
+        const { filename, mimetype, encoding, createReadStream } = file.file
+
+        if (mimetype !== 'image/png' &&
+            mimetype !== 'image/jpg' &&
+            mimetype !== 'image/jpeg') {
+            errors.push({
+                message: 'File type not allowed.'
+            })
+        }
+
         if (errors.length > 0) {
             const error = new Error('Invalid input.')
             error.data = errors
@@ -129,10 +147,13 @@ module.exports = {
             throw error
         }
 
+        const stream = createReadStream();
+        const { path } = await storeFS({ stream, filename });
+
         const post = new Post({
             title: postInput.title,
             content: postInput.content,
-            imageUrl: postInput.imageUrl,
+            imageUrl: path.substring(path.indexOf('images/')),
             creator: user
         })
 
@@ -181,7 +202,8 @@ module.exports = {
         }
     },
 
-    singleUpload: async function ({ file }, req) {
+    singleUpload: async function ({ file, message }, req) {
+        console.log("singleUpload", message);
         const { filename, mimetype, encoding, createReadStream } = file.file
         const stream = createReadStream();
         const { path } = await storeFS({ stream, filename });

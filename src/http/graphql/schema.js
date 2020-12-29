@@ -47,7 +47,7 @@ module.exports = buildSchema(`
     input PostInputData {
         title: String!
         content: String!
-        imageUrl: String!
+        file: Upload!
     }
 
     type RootQuery {
@@ -58,8 +58,7 @@ module.exports = buildSchema(`
     type RootMutation {
         createUser(userInput: UserInputData): User!
         createPost(postInput: PostInputData): Post!
-        singleUpload(file: Upload!): Boolean!
-
+        singleUpload(file: Upload!, message: String!): Boolean!
     }
 
     schema {

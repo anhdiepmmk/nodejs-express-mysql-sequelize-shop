@@ -55,6 +55,6 @@ mongoose.connect('mongodb://course:course2123@localhost:27017/messages?authSourc
     .then(e => console.log('Mongodb connected'))
     .catch(e => console.log('Mongodb connection failed'))
 
-const server = app.listen(8081, () => {
-    console.log('Express running at 8081 port!');
+const server = app.listen(8080, () => {
+    console.log('Express running at 8080 port!');
 })
