@@ -6,7 +6,8 @@ module.exports = (req, res, next) => {
         const authHeader = req.get('Authorization')
 
         if (!authHeader) {
-            throw new UnauthorizedError('Authorization header not found.')
+            req.isAuth = false
+            return next()
         }
 
         const token = authHeader.split(' ')[1]
@@ -14,13 +15,15 @@ module.exports = (req, res, next) => {
         const decodedToken = jwt.verify(token, 'a-secret-string')
 
         if (!decodedToken) {
-            throw new UnauthorizedError('Token is invalid.')
+            req.isAuth = false
+            return next()
         }
 
         req.userId = decodedToken.userId
-
+        req.isAuth = true
         next()
     } catch (error) {
-        next(error)
+        req.isAuth = false
+        return next()
     }
 }

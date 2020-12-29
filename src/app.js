@@ -8,11 +8,14 @@ const { graphqlHTTP } = require('express-graphql')
 
 const graphqlSchema = require('./http/graphql/schema')
 const graphqlResolvers = require('./http/graphql/resolvers')
+const auth = require('./http/middleware/auth')
 
 // app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(cors())
 app.use('/images', express.static(path.join(__dirname, '..', 'public', 'images')))
+
+app.use(auth)
 
 app.use('/graphql', graphqlHTTP({
     schema: graphqlSchema,
