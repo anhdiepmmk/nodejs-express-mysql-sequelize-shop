@@ -98,8 +98,6 @@ module.exports = {
     },
 
     createPost: async function ({ postInput }, req) {
-        console.log(req, req.userId, req.isAuth);
-
         if (!req.isAuth) {
             const error = new Error('Not authenticated!')
             error.code = 401
@@ -342,11 +340,9 @@ module.exports = {
     },
 
     singleUpload: async function ({ file, message }, req) {
-        console.log("singleUpload", message);
         const { filename, mimetype, encoding, createReadStream } = file.file
         const stream = createReadStream();
         const { path } = await storeFS({ stream, filename });
-        console.log(path);
         return true
     }
 }
