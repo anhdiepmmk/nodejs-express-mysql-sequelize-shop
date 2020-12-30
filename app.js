@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const path = require("path");
 const fs = require('fs');
 const https = require('https');
@@ -26,14 +28,17 @@ const authRoutes = require("./routes/auth");
 const User = require("./models/user");
 const NotFoundError = require("./errors/NotFoundError");
 
-const accessLogStream = fs.createWriteStream(
-  path.join(__dirname, 'access.log'),
-  { flags: 'a' }
-)
-
 app.use(helmet())
 app.use(compression())
-app.use(morgan('combined', { stream: accessLogStream }))
+
+if (false) {
+  const accessLogStream = fs.createWriteStream(
+    path.join(__dirname, 'access.log'),
+    { flags: 'a' }
+  )
+
+  app.use(morgan('combined', { stream: accessLogStream }))
+}
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(
