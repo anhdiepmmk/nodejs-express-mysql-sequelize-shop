@@ -10,8 +10,6 @@ const fileUpload = require('express-fileupload')
 
 const errorController = require("./controllers/error");
 
-const mongoConnectionString = "mongodb://shop:shop2123@localhost:27017/shop?authSource=admin";
-
 const app = express();
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -39,7 +37,7 @@ app.use(
     saveUninitialized: true,
     secret: "3MlrtFPD521GNDii",
     store: new MongoStore({
-      url: mongoConnectionString,
+      url: process.env.DB_URL,
       collection: "sessions",
     }),
   })
@@ -90,7 +88,7 @@ app.use((err, req, res, next) => {
 });
 
 mongoose
-  .connect(mongoConnectionString, {
+  .connect(process.env.DB_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
   })
