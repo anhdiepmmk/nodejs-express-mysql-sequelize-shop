@@ -320,7 +320,7 @@ module.exports = {
         const user = await User.findById(req.userId)
 
         if (!user) {
-            const error = new Error('Invalid user.')
+            const error = new Error('User not found.')
             error.code = 401
             throw error
         }
@@ -353,6 +353,47 @@ module.exports = {
                 }
             }));
         })
+    },
+
+    user: async function (args, req) {
+        if (!req.isAuth) {
+            const error = new Error('Not authenticated!')
+            error.code = 401
+            throw error
+        }
+
+        const user = await User.findById(req.userId)
+
+        if (!user) {
+            const error = new Error('User not found.')
+            error.code = 401
+            throw error
+        }
+
+        console.log(user.toJSON());
+
+        return user.toJSON()
+    },
+
+    updateStatus: async function ({ status }, req) {
+        if (!req.isAuth) {
+            const error = new Error('Not authenticated!')
+            error.code = 401
+            throw error
+        }
+
+        const user = await User.findById(req.userId)
+
+        if (!user) {
+            const error = new Error('User not found.')
+            error.code = 401
+            throw error
+        }
+
+        user.status = status
+        const updatedUser = await user.save()
+
+        return updatedUser.toJSON()
     },
 
     singleUpload: async function ({ file, message }, req) {
