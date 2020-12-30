@@ -92,26 +92,11 @@ app.use((err, req, res, next) => {
 mongoose
   .connect(mongoConnectionString, {
     useNewUrlParser: true,
-    // useUnifiedTopology: true
+    useUnifiedTopology: true
   })
   .then((result) => {
     console.log("Mongodb Connected!");
-    User.findOne()
-      .then((user) => {
-        if (!user) {
-          return new User({
-            name: "Diep",
-            email: "n08ni.dieppn@gmail.com",
-            cart: { items: [] },
-          }).save();
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-      .finally(() => {
-        app.listen(3000);
-      });
+    app.listen(3000);
   })
   .catch((err) => {
     console.log(err);
