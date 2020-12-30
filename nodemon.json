@@ -1,0 +1,7 @@
+{
+    "env": {
+        "DB_URL": "mongodb://shop:shop2123@localhost:27017/shop?authSource=admin",
+        "PORT": "4000",
+        "STRIPE_KEY": "sk_test_51HzL5HJ9TaLfhvGNl04uWHoupyEhBVM9uuzvLDbSur9F0MmHrFh3m2yymQi44Y0HpyZaBJ2SYq7Rcf2cGrAfUWY000Gx0hFP9w"
+    }
+}
