@@ -28,7 +28,7 @@ const authRoutes = require("./routes/auth");
 const User = require("./models/user");
 const NotFoundError = require("./errors/NotFoundError");
 
-app.use(helmet())
+// app.use(helmet())
 app.use(compression())
 
 if (false) {
