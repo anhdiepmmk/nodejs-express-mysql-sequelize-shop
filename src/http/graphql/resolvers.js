@@ -370,8 +370,6 @@ module.exports = {
             throw error
         }
 
-        console.log(user.toJSON());
-
         return user.toJSON()
     },
 
