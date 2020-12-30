@@ -7,8 +7,8 @@ services:
     ports:
       - 27017:27017
     environment:
-      - MONGO_INITDB_DATABASE=course
-      - MONGO_INITDB_ROOT_USERNAME=course
-      - MONGO_INITDB_ROOT_PASSWORD=course2123
+      - MONGO_INITDB_DATABASE=shop
+      - MONGO_INITDB_ROOT_USERNAME=shop
+      - MONGO_INITDB_ROOT_PASSWORD=shop2123
     volumes:
       - ./data/db:/data/db
