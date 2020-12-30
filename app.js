@@ -10,8 +10,7 @@ const fileUpload = require('express-fileupload')
 
 const errorController = require("./controllers/error");
 
-const mongoConnectionString =
-  "mongodb+srv://admin:admina123@cluster0.tkdbb.mongodb.net/test?retryWrites=true&w=majority";
+const mongoConnectionString = "mongodb://shop:shop2123@localhost:27017/shop?authSource=admin";
 
 const app = express();
 app.set("view engine", "ejs");
@@ -92,7 +91,7 @@ app.use((err, req, res, next) => {
 
 mongoose
   .connect(mongoConnectionString, {
-    // useNewUrlParser: true,
+    useNewUrlParser: true,
     // useUnifiedTopology: true
   })
   .then((result) => {
