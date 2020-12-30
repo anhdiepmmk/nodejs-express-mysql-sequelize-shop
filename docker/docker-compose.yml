@@ -12,3 +12,13 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=shop2123
     volumes:
       - ./data/db:/data/db
+  express:
+    restart: always
+    build: 
+      context: ./../
+      dockerfile: ./docker/sources/Dockerfile.express
+    container_name: express
+    environment: 
+      - 'DB_URL=mongodb://shop:shop2123@192.168.0.6:27017/shop?authSource=admin'
+    ports:
+      - 3000:3000
