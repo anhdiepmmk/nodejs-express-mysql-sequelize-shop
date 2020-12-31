@@ -62,12 +62,13 @@ exports.createPost = async (req, res, next) => {
         user.posts.push(result)
         await user.save()
 
-        io.getIO().emit('posts', { action: 'create', post: result })
-
         res.status(201).json({
             message: "Post created successfully!",
             post: result
         })
+
+        //Todo: will throw exception in test case
+        io.getIO().emit('posts', { action: 'create', post: result })
     } catch (error) {
         error.data = error.stack
         next(error)
