@@ -1,12 +1,14 @@
 const jwt = require('jsonwebtoken')
-const { JsonWebTokenError } = jwt
 const sinon = require('sinon')
 
 const expect = require('chai').expect
 
 const authMiddleware = require('./../src/http/middleware/is-auth')
+const { JsonWebTokenError } = jwt
+
 
 describe('Auth Middleware', () => {
+
     it('should throw an error if no authorization header is present', () => {
         const req = {
             get: (headerName) => {
