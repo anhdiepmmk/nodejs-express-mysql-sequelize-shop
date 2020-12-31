@@ -39,11 +39,15 @@ describe('Auth Middleware', () => {
 
         authMiddleware(req, {}, () => { })
 
-        expect(req).to.have.property('userId')
-        expect(req).to.have.property('userId', 'abc')
-        expect(jwt.verify.called).to.be.true
-
-        jwt.verify.restore()
+        try {
+            expect(req).to.have.property('userId')
+            expect(req).to.have.property('userId', 'abc')
+            expect(jwt.verify.called).to.be.true
+        } catch (error) {
+            throw error
+        } finally {
+            jwt.verify.restore()
+        }
     })
 
     it('should throw an error if the token cannot be verified', () => {
