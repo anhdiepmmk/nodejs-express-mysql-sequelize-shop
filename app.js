@@ -1,9 +1,7 @@
 import express from 'express';
-import resHandler from './respons-handler.js';
+import resHandler from './response-handler.js';
 
 const app = express()
-
-console.log(resHandler);
 
 app.use('/', resHandler)
 
