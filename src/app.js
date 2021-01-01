@@ -43,3 +43,5 @@ io.on('connection', socket => {
     console.log('Client connected!');
 })
 console.log('Mongodb connected')
+
+module.exports = app
