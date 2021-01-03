@@ -1,9 +1,9 @@
-import { serve } from "https://deno.land/std@0.83.0/http/server.ts";
+import { Application } from "https://deno.land/x/oak@v6.4.1/mod.ts";
 
-const server = serve({port: 3000})
+const app = new Application();
 
-console.log("http://localhost:3000/");
+app.use((ctx) => {
+  ctx.response.body = "Hello World!!!";
+});
 
-for await (const req of server){
-    req.respond({body: "Hello World!\n"})
-}
+await app.listen({ port: 8000 });
