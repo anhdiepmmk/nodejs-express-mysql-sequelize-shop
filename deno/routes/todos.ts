@@ -27,12 +27,31 @@ router.post('/todos', async (ctx) => {
     ctx.response.body = { message: 'Created todo!', todo: newTodo };
 });
 
-router.put('/todos/:todoId', (ctx) => {
+router.put('/todos/:todoId', async (ctx) => {
+    const body = ctx.request.body({type: 'json'});
+    const value = await body.value;
 
+    const id: string | undefined = ctx.params.todoId;
+
+    const foundIndex = todos.findIndex(value => value.id === id);
+
+    if (foundIndex > -1) {
+        todos[foundIndex] = {
+            id: id!, text: value.text
+        };
+
+        ctx.response.body = { message: 'Updated!' };
+    } else {
+        ctx.response.body = { message: 'Id not found!' };
+    }
 });
 
-router.delete('/todos/:todoId', (ctx) => {
+router.delete('/todos/:todoId', async (ctx) => {
+    const id = ctx.params.todoId;
 
+    todos = todos.filter(value => value.id !== id);
+
+    ctx.response.body = { message: 'Deleted!' }
 });
 
 export default router;
