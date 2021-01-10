@@ -1,46 +1,57 @@
 import { Router } from "https://deno.land/x/oak@v6.4.1/mod.ts";
+import db from "./../helpers/db_client.ts";
+import { Bson } from "https://deno.land/x/mongo@v0.20.1/mod.ts";
 
 const router = new Router();
 
-interface Todo {
-    id: string;
-    text: string;
+interface TodoSchema {
+  _id: Bson.ObjectId;
+   text: string;
 }
 
-let todos: Todo[] = [];
 
-router.get('/todos', (ctx) => {
-    ctx.response.body = { todos: todos };
+router.get('/todos', async (ctx) => {
+    const todos: TodoSchema[] = await db.collection<TodoSchema>('todos').find().toArray();
+
+    const transformedTodos = todos.map((todo: TodoSchema) => {
+        return {
+             id: todo._id.toString(), text: todo.text
+        };
+    });
+
+    ctx.response.body = { todos: transformedTodos };
 });
 
 router.post('/todos', async (ctx) => {
     const body = ctx.request.body({type: 'json'});
     const value = await body.value
 
-    const newTodo: Todo = {
-        id: new Date().toISOString(),
+    const doc = {
         text: value.text,
-    };
+    }
 
-    todos.push(newTodo);
+    const insertId = await db.collection<TodoSchema>('todos').insertOne(doc);
 
-    ctx.response.body = { message: 'Created todo!', todo: newTodo };
+    ctx.response.body = { message: 'Created todo!', todo: { ...doc, _id: insertId } };
 });
 
 router.put('/todos/:todoId', async (ctx) => {
     const body = ctx.request.body({type: 'json'});
     const value = await body.value;
 
+    const collectionTodos = db.collection<TodoSchema>('todos');
+
     const id: string | undefined = ctx.params.todoId;
 
-    const foundIndex = todos.findIndex(value => value.id === id);
+    const found: TodoSchema | undefined = await collectionTodos.findOne({ _id: new Bson.ObjectId(id) });
 
-    if (foundIndex > -1) {
-        todos[foundIndex] = {
-            id: id!, text: value.text
-        };
-
-        ctx.response.body = { message: 'Updated!' };
+    if (found) {
+        const result = await collectionTodos.updateOne({
+            _id: new Bson.ObjectId(id)
+        }, {
+            $set: { text: value.text }
+        })
+        ctx.response.body = { message: 'Updated!', data: result };
     } else {
         ctx.response.body = { message: 'Id not found!' };
     }
@@ -49,9 +60,20 @@ router.put('/todos/:todoId', async (ctx) => {
 router.delete('/todos/:todoId', async (ctx) => {
     const id = ctx.params.todoId;
 
-    todos = todos.filter(value => value.id !== id);
+    const collectionTodos = db.collection<TodoSchema>('todos');
 
-    ctx.response.body = { message: 'Deleted!' }
+    const found: TodoSchema | undefined = await collectionTodos.findOne({ _id: new Bson.ObjectId(id) });
+
+    if (found) {
+        const result = await collectionTodos.deleteOne({
+            _id: new Bson.ObjectId(id)
+        })
+        ctx.response.body = { message: 'Deleted!', result: result }
+    } else {
+        ctx.response.body = { message: 'Id not found!' };
+    }
+
+    
 });
 
 export default router;
