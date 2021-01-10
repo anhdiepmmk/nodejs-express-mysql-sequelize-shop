@@ -1,0 +1,14 @@
+version: '3'
+services:
+  mongodb:
+    restart: unless-stopped
+    image: mongo:4
+    container_name: mongodb
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_DATABASE=course
+    volumes:
+      - mongodbdatav2:/data/db
+volumes: 
+  mongodbdatav2:
